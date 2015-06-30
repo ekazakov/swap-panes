@@ -1,5 +1,7 @@
-SwapPanesView = require './swap-panes-view'
+LabelView = require './label-view'
 {CompositeDisposable} = require 'atom'
+
+LABELS = ['A', 'S', 'D', 'F', 'J', 'K', ';', 'W', 'E', 'I', 'O']
 
 module.exports = SwapPanes =
   swapPanesView: null
@@ -8,7 +10,7 @@ module.exports = SwapPanes =
   isActive: false
 
   activate: (state) ->
-    @swapPanesView = new SwapPanesView(state.swapPanesViewState)
+    @swapPanesView = new SwapPanesView()
 
     # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
     @subscriptions = new CompositeDisposable
@@ -32,22 +34,20 @@ module.exports = SwapPanes =
 
 
   toggle: ->
-      pane = atom.workspace.getActivePane()
-      @paneElement = atom.views.getView(pane)
+    panes = atom.workspace.getPanes();
+    panesViews = panes.map (pane) -> atom.views.getView(pane)
 
-      if not @isActive
-        @paneElement.appendChild @swapPanesView.getElement()
-        @isActive = true
-      else
-        @isActive = false
-        @paneElement.removeChild @swapPanesView.getElement()
+    panesViews
+
+    # views = (new LabelView(label) for label in LABELS.slice(0, panesViews.length))
 
 
-    # if @modalPanel.isVisible()
-    #   @modalPanel.hide()
-    # else
-    #   editor = atom.workspace.getActiveTextEditor()
-    #   words = editor.getText().split(/\s+/).length
-    #
-    #   @swapPanesView.setCount(words)
-    #   @modalPanel.show()
+#   pane = atom.workspace.getActivePane()
+    #   @paneElement = atom.views.getView(pane)
+
+    #   if not @isActive
+    #     @paneElement.appendChild @swapPanesView.getElement()
+    #     @isActive = true
+    #   else
+    #     @isActive = false
+    #     @paneElement.removeChild @swapPanesView.getElement()
