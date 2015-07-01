@@ -1,10 +1,10 @@
 module.exports =
 class LabelView
-    constructor: (label) ->
+    constructor: (labelText) ->
         @element = document.createElement('div')
         @element.classList.add('swap-panes')
         label = document.createElement('div')
-        label.textContent = label
+        label.textContent = labelText
 
         @element.appendChild(label)
 

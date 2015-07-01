@@ -10,16 +10,16 @@ module.exports =
     DOWN_ARROW: 40
     INSERT: 45
     DELETE: 46
-    ZERO: 48
-    ONE: 49
-    TWO: 50
-    THREE: 51
-    FOUR: 52
-    FIVE: 53
-    SIX: 54
-    SEVEN: 55
-    EIGHT: 56
-    NINE: 57
+    0: 48
+    1: 49
+    2: 50
+    3: 51
+    4: 52
+    5: 53
+    6: 54
+    7: 55
+    8: 56
+    9: 57
     A: 65
     B: 66
     C: 67

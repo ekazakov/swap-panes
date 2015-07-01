@@ -1,53 +1,59 @@
 LabelView = require './label-view'
+KEYS = require './key-codes'
+
 {CompositeDisposable} = require 'atom'
 
 LABELS = ['A', 'S', 'D', 'F', 'J', 'K', ';', 'W', 'E', 'I', 'O']
 
 module.exports = SwapPanes =
-  swapPanesView: null
-  modalPanel: null
-  subscriptions: null
-  isActive: false
+    swapPanesView: null
+    modalPanel: null
+    subscriptions: null
+    isActive: false
+    timeout: null
 
-  activate: (state) ->
-    @swapPanesView = new SwapPanesView()
+    activate: (state) ->
+        # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
+        @subscriptions = new CompositeDisposable
 
-    # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
-    @subscriptions = new CompositeDisposable
+        # Register command that toggles this view
+        @subscriptions.add atom.commands.add('atom-workspace', 'swap-panes:toggle': => @toggle())
+        @subscriptions.add atom.commands.add('atom-workspace', 'keydown': @onKeyDown.bind(@))
 
-    # Register command that toggles this view
-    @subscriptions.add atom.commands.add('atom-workspace', 'swap-panes:toggle': => @toggle())
-    @subscriptions.add atom.commands.add('atom-workspace', 'keydown': (event) => @log(event))
+    deactivate: ->
+        @subscriptions.dispose()
+        @swapPanesView.destroy()
 
-  deactivate: ->
-    # @modalPanel.destroy()
-    @subscriptions.dispose()
-    @swapPanesView.destroy()
-
-  log: (event) ->
-    if @isActive
-        event.stopImmediatePropagation()
-        event.preventDefault()
-        @paneElement.removeChild @swapPanesView.getElement()
-        console.log(event)
+    hide: ->
+        @items.forEach (item) -> item.labelView.destroy()
         @isActive = false
+        clearTimeout @timeout
 
+    onKeyDown: (event) ->
+        if @isActive
+            event.stopImmediatePropagation()
+            event.preventDefault()
 
-  toggle: ->
-    panes = atom.workspace.getPanes();
-    panesViews = panes.map (pane) -> atom.views.getView(pane)
+            item = @items.filter((item) -> item.key == event.keyCode)[0]
+            item.paneView.focus() if item
+            @hide()
 
-    panesViews
+    toggle: ->
+        if not @isActive
+            @isActive = true
+            panes = atom.workspace.getPanes();
 
-    # views = (new LabelView(label) for label in LABELS.slice(0, panesViews.length))
+            # @timeout = setTimeout (=> @hide()), 3000
+            @items = panes.map (pane, index) ->
+                label = LABELS[index]
+                labelView = new LabelView(label)
+                paneView = atom.views.getView(pane)
+                paneView.appendChild labelView.getElement()
 
-
-#   pane = atom.workspace.getActivePane()
-    #   @paneElement = atom.views.getView(pane)
-
-    #   if not @isActive
-    #     @paneElement.appendChild @swapPanesView.getElement()
-    #     @isActive = true
-    #   else
-    #     @isActive = false
-    #     @paneElement.removeChild @swapPanesView.getElement()
+                label: label
+                key: KEYS[label]
+                pane: pane
+                paneView: paneView
+                labelView: labelView
+        else
+            @isActive = false
